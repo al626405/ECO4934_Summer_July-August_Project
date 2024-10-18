@@ -1,0 +1,49 @@
+# Define the absolute path to the TeamB directory
+TEAM_B_PATH := $(shell realpath TeamB)
+
+# Makefile
+
+DUMP_DIR = $(TEAM_B_PATH)/Code/SQL/MariaDB/FinalDBDumps
+SQLITE_DIR = $(TEAM_B_PATH)/Code/SQL/SQLITE3
+
+# Define targets
+#all: dump convert clean import
+
+#Defining DBS
+DBS = Exclude1 Exclude2 FinalPipe
+TABLES = Test Train Validation
+
+
+# Convert tab-separated files to CSV
+convert:
+	for db in $(DBS); do \
+		echo "Converting tabs to CSV for $$db"; \
+		mkdir -p $(DUMP_DIR)/DB_$$db/ConvertedData; \
+		for table in $(TABLES); do \
+			if [ -f $(DUMP_DIR)/DB_$$db/$$table.txt ]; then \
+				sed 's/\t/,/g' $(DUMP_DIR)/DB_$$db/$$table.txt > $(DUMP_DIR)/DB_$$db/ConvertedData/$$table.csv; \
+			fi; \
+		done; \
+	done
+
+# Import CSV files into SQLite
+import:
+	for db in $(DBS); do \
+		echo "Importing data into SQLite for $$db"; \
+		if [ -f $(DUMP_DIR)/DB_$$db/$$db.sql ]; then \
+			# Execute the SQL file to create tables \
+			sqlite3 $(SQLITE_DIR)/$$db.db < $(DUMP_DIR)/DB_$$db/$$db.sql; \
+		fi; \
+		# Create and execute a temporary SQL script to import CSV files \
+		echo ".mode csv" > /tmp/$$db_import.sql; \
+		for table in $(TABLES); do \
+			if [ -f $(DUMP_DIR)/DB_$$db/ConvertedData/$$table.csv ]; then \
+				echo ".import $(DUMP_DIR)/DB_$$db/ConvertedData/$$table.csv $$table" >> /tmp/$$db_import.sql; \
+			fi; \
+		done; \
+		sqlite3 $(SQLITE_DIR)/$$db.db < /tmp/$$db_import.sql; \
+		rm /tmp/$$db_import.sql; \
+	done
+
+
+

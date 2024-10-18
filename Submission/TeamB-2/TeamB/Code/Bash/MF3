@@ -1,0 +1,27 @@
+# Define the absolute path to the TeamB directory
+TEAM_B_PATH := $(shell realpath TeamB)
+
+# Define variables
+LATEX_FILE = $(TEAM_B_PATH)/Code/Latex/beamer_presentation_UPDATED.tex
+OUTPUT_DIR = $(TEAM_B_PATH)/Slides
+OUTPUT_FILE = $(OUTPUT_DIR)/Slides.pdf
+PYTHON_SCRIPT = $(TEAM_B_PATH)/Code/Python3/RocCombine.py
+
+# Default target
+all: run_python_script compile
+
+# Run the Python script
+run_python_script:
+	python3 $(PYTHON_SCRIPT)
+
+# Compile LaTeX file with pdftex
+compile: run_python_script
+	@mkdir -p $(OUTPUT_DIR)
+	pdflatex -output-directory=$(OUTPUT_DIR) $(LATEX_FILE)
+
+# Clean up auxiliary files
+clean:
+	rm -f $(OUTPUT_DIR)/*.aux $(OUTPUT_DIR)/*.log $(OUTPUT_DIR)/*.out
+
+# Optional: Provide a .PHONY rule for non-file targets
+

@@ -1,0 +1,59 @@
+# Define the absolute path to the TeamB directory
+TEAM_B_PATH := $(shell realpath TeamB)
+
+# Makefile
+
+# Define the folder where your R scripts are located
+R_SCRIPTS_DIR = $(TEAM_B_PATH)/Code/R
+PYTHON_SCRIPTS_DIR = $(TEAM_B_PATH)/Code/Python3
+
+# Define the R script names
+RSCRIPTS = LogitLasso.R DecisionTree.R Bagging.R
+PYTHONSCRIPTS = Boosting.py RandomForest.py
+
+# Default target to run all scripts
+all: $(RSCRIPTS)
+
+# Rule to run each R script
+# This will use Rscript to execute the scripts located in R_SCRIPTS_DIR
+$(RSCRIPTS):
+	Rscript $(R_SCRIPTS_DIR)/$@
+
+
+
+all: install
+
+install:
+	# Check if requirements.txt exists
+	@if [ ! -f TeamB/Code/Python3/Requirements.txt ]; then \
+		echo "requirements.txt not found!"; \
+		exit 1; \
+	fi
+	# Update pip to the latest version
+	echo "Updating pip..."
+	python3 -m pip install --upgrade pip
+	# Install libraries from requirements.txt
+	echo "Installing libraries from Requirements.txt..."
+	pip3 install -r TeamB/Code/Python3/Requirements.txt
+	echo "All libraries installed successfully."
+
+clean:
+	rm -rf __pycache__
+
+
+# Default target to run all scripts
+all: $(PYTHONSCRIPTS)
+
+# Rule to run each R script
+# This will use Rscript to execute the scripts located in R_SCRIPTS_DIR
+$(PYTHONSCRIPTS):
+	python3 $(PYTHON_SCRIPTS_DIR)/$@
+
+
+# Clean target to remove any temporary files if needed
+clean:
+	@echo "Cleaning up..."
+	# Add any cleanup commands here (e.g., remove temporary files)
+	# rm -f /path/to/temp/files
+
+# Phony targets are not actual files
